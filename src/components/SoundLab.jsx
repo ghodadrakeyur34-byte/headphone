@@ -117,28 +117,45 @@ export default function SoundLab() {
     }
   };
 
-  // Oscilloscope waveform animation
+  // Oscilloscope waveform animation with IntersectionObserver pause
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let phase = 0;
+    let isVisible = true;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        if (isVisible && !animFrameRef.current) {
+          animFrameRef.current = requestAnimationFrame(render);
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(canvas);
 
     const render = () => {
+      if (!isVisible) {
+        animFrameRef.current = null;
+        return;
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const width = canvas.width;
       const height = canvas.height;
       const centerY = height / 2;
 
       ctx.beginPath();
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2.5;
 
       const cur = modes.find((m) => m.id === activeMode);
       ctx.strokeStyle = isPlaying ? cur.badgeColor : 'rgba(255, 255, 255, 0.25)';
       ctx.shadowColor = isPlaying ? cur.badgeColor : 'transparent';
-      ctx.shadowBlur = isPlaying ? 20 : 0;
+      ctx.shadowBlur = isPlaying ? 16 : 0;
 
-      const segments = 120;
+      const segments = window.innerWidth <= 768 ? 60 : 100;
       for (let i = 0; i <= segments; i++) {
         const x = (i / segments) * width;
         let amplitude = isPlaying ? 28 : 6;
@@ -163,6 +180,7 @@ export default function SoundLab() {
     render();
 
     return () => {
+      observer.disconnect();
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, [isPlaying, activeMode]);

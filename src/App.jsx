@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CanvasSequence from './components/CanvasSequence.jsx';
 import ThreeUIDock from './components/ThreeUIDock.jsx';
 import SoundLab from './components/SoundLab.jsx';
@@ -8,44 +8,46 @@ import CheckoutModal from './components/CheckoutModal.jsx';
 import './App.css';
 
 export default function App() {
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [currentFrame, setCurrentFrame] = useState(1);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
+  const activeSectionRef = useRef('overview');
 
-  // Track global page scroll progress for background frame sequence
-  const handleScroll = useCallback(() => {
-    const docHeight = document.documentElement.scrollHeight;
-    const winHeight = window.innerHeight;
-    const maxScroll = docHeight - winHeight;
-    const currentScroll = window.scrollY;
-
-    const progress = maxScroll > 0 ? Math.min(1, Math.max(0, currentScroll / maxScroll)) : 0;
-    setScrollProgress(progress);
-
-    // Active section indicator
-    if (currentScroll < 700) {
-      setActiveSection('overview');
-    } else if (currentScroll < 1700) {
-      setActiveSection('architecture');
-    } else if (currentScroll < 2600) {
-      setActiveSection('sound-lab');
-    } else if (currentScroll < 3500) {
-      setActiveSection('color-studio');
-    } else {
-      setActiveSection('specifications');
-    }
-  }, []);
-
+  // Track active section only (debounced to avoid re-renders)
   useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScroll = window.scrollY;
+          let nextSection = 'overview';
+
+          if (currentScroll < 700) {
+            nextSection = 'overview';
+          } else if (currentScroll < 1700) {
+            nextSection = 'architecture';
+          } else if (currentScroll < 2600) {
+            nextSection = 'sound-lab';
+          } else if (currentScroll < 3500) {
+            nextSection = 'color-studio';
+          } else {
+            nextSection = 'specifications';
+          }
+
+          if (nextSection !== activeSectionRef.current) {
+            activeSectionRef.current = nextSection;
+            setActiveSection(nextSection);
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
-
-  const handleFrameProgress = useCallback((prog, frame) => {
-    setCurrentFrame(frame);
   }, []);
 
   const scrollToSection = (id) => {
@@ -59,8 +61,6 @@ export default function App() {
     <div className="sylva-app">
       {/* Fixed Fullscreen 3D Headphone Canvas Background */}
       <CanvasSequence
-        scrollProgress={scrollProgress}
-        onProgressUpdate={handleFrameProgress}
         isAutoPlay={isAutoPlay}
         onToggleAutoPlay={() => setIsAutoPlay(!isAutoPlay)}
       />

@@ -44,19 +44,28 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 2;
+  height: 100dvh;
+  z-index: 1;
   pointer-events: none;
   background: #040507;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  contain: strict;
+  transform: translateZ(0);
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .sequence-canvas {
   width: 100%;
   height: 100%;
   display: block;
+  touch-action: pan-y;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: auto;
 }
 
 .canvas-vignette {
@@ -84,15 +93,12 @@
    --------------------------------------------------------- */
 .sylva-hero {
   position: relative;
+  z-index: 2;
   width: 100%;
   height: 100svh;
   min-height: calc(880 * var(--u));
   overflow: hidden;
-  isolation: isolate;
-  background:
-    radial-gradient(64% 52% at 27% 84%, rgba(232, 238, 222, 0.07) 0%, rgba(232, 238, 222, 0) 72%),
-    radial-gradient(70% 60% at 92% 8%, rgba(24, 28, 20, 0.12) 0%, rgba(24, 28, 20, 0) 68%),
-    #050608;
+  background: transparent;
 }
 
 .sylva-hero::after {
@@ -955,9 +961,15 @@
 }
 
 /* ---------------------------------------------------------
-   RESPONSIVENESS
+   RESPONSIVENESS & MOBILE OPTIMIZATION
    --------------------------------------------------------- */
 @media (max-width: 992px) {
+  .sylva-hero {
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+  }
+
   .stage {
     position: relative;
     left: auto;
@@ -966,10 +978,11 @@
     width: 100%;
     height: auto;
     min-height: 100vh;
-    padding: 120px 24px 60px;
+    min-height: 100dvh;
+    padding: 70px 20px 60px;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 24px;
   }
   .headline, .lede, .stat--a, .stat--b, .card--about, .card--stove, .pill-clip, .play-wrap {
     position: relative;
@@ -982,15 +995,159 @@
     margin: 0 !important;
   }
   .card--about, .card--stove {
-    border-radius: 28px;
+    border-radius: 24px;
     padding: 24px;
-    height: 280px !important;
+    min-height: 240px !important;
   }
   .headline {
-    font-size: 2.8rem;
-    line-height: 1.1;
+    font-size: clamp(2.4rem, 7vw, 3.2rem);
+    line-height: 1.12;
   }
   .lede {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 600px;
+  }
+}
+
+/* Dedicated Mobile Breakpoint (<= 768px) */
+@media (max-width: 768px) {
+  /* Dock: Thumb-friendly mobile navigation bar at bottom */
+  .dock-wrap {
+    top: auto;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    padding: 0 10px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dock {
+    height: 48px;
+    padding: 4px;
+    border-radius: 999px;
+    gap: 4px;
+    max-width: 96vw;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6), inset 0 1px rgba(255, 255, 255, 0.15);
+  }
+
+  .dock::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dock-item {
+    height: 38px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+    gap: 5px;
+    transform: none !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .dock-item .glyph {
+    width: 13px;
+    height: 13px;
+  }
+
+  .dock-mark {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+  }
+
+  /* Compact controls on mobile hero */
+  .pill-clip {
+    clip-path: none;
+    height: auto;
+    margin: 0;
+    width: 100% !important;
+  }
+
+  .pill {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+
+  .liquid-stage--explore {
+    --h: 52px;
+    width: 100%;
+    padding: 0;
+  }
+
+  .liquid-button--explore {
+    width: 100%;
+    height: 52px;
+    font-size: 0.95rem;
+    justify-content: center;
+    border-radius: 999px;
+  }
+
+  .play-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px !important;
+  }
+
+  .liquid-stage--play {
+    --h: 60px;
+    padding: 0;
+  }
+
+  .liquid-button--play {
+    width: 60px;
+    height: 60px;
+  }
+
+  .stat {
+    width: 100% !important;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+  }
+
+  .stat dd {
+    font-size: 1.8rem;
+  }
+
+  /* Section padding and titles on mobile */
+  .sylva-section {
+    padding: 80px 0;
+  }
+
+  .sylva-section-title {
+    font-size: 2.2rem;
+  }
+
+  .sylva-section-desc {
     font-size: 1rem;
+  }
+
+  .sylva-cta-title {
+    font-size: 2.4rem;
+  }
+}
+
+/* Extra small mobile screens (<= 460px) */
+@media (max-width: 460px) {
+  .dock-item:not(.dock-mark):not(.dock-item--enter):not(.is-active) .dock-item-label {
+    display: none;
+  }
+
+  .dock-item {
+    padding: 0 8px;
+  }
+
+  .dock-item.is-active .dock-item-label {
+    display: inline-block;
   }
 }
