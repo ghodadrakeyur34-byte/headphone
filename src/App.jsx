@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import CanvasSequence from './components/CanvasSequence.jsx';
+import ThreeUIDock from './components/ThreeUIDock.jsx';
 import SoundLab from './components/SoundLab.jsx';
 import ColorStudio from './components/ColorStudio.jsx';
 import SpecsGrid from './components/SpecsGrid.jsx';
@@ -11,7 +12,7 @@ export default function App() {
   const [currentFrame, setCurrentFrame] = useState(1);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [activeSection, setActiveSection] = useState('overview');
 
   // Track global page scroll progress for background frame sequence
   const handleScroll = useCallback(() => {
@@ -23,10 +24,17 @@ export default function App() {
     const progress = maxScroll > 0 ? Math.min(1, Math.max(0, currentScroll / maxScroll)) : 0;
     setScrollProgress(progress);
 
-    if (currentScroll > 350) {
-      setShowStickyBar(true);
+    // Active section indicator
+    if (currentScroll < 700) {
+      setActiveSection('overview');
+    } else if (currentScroll < 1700) {
+      setActiveSection('architecture');
+    } else if (currentScroll < 2600) {
+      setActiveSection('sound-lab');
+    } else if (currentScroll < 3500) {
+      setActiveSection('color-studio');
     } else {
-      setShowStickyBar(false);
+      setActiveSection('specifications');
     }
   }, []);
 
@@ -48,8 +56,8 @@ export default function App() {
   };
 
   return (
-    <div className="aura-cinema-app liquid-glass-theme">
-      {/* 3D Headphone Sequence as Fixed Fullscreen Background */}
+    <div className="sylva-app">
+      {/* Fixed Fullscreen 3D Headphone Canvas Background */}
       <CanvasSequence
         scrollProgress={scrollProgress}
         onProgressUpdate={handleFrameProgress}
@@ -57,209 +65,229 @@ export default function App() {
         onToggleAutoPlay={() => setIsAutoPlay(!isAutoPlay)}
       />
 
-      {/* Floating Liquid Glass Navigation Bar (matching UI.jpg pill bar) */}
-      <header className="liquid-floating-nav">
-        <div className="nav-inner">
-          <div className="nav-brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <span className="liquid-brand-bubble">◈</span>
-            <span className="brand-name">AURA PRO</span>
-            <span className="brand-model">LIQUID GLASS</span>
+      {/* Floating ThreeUI Proximity Dock */}
+      <ThreeUIDock
+        activeSection={activeSection}
+        onSectionClick={scrollToSection}
+        onPreOrderClick={() => setIsCheckoutOpen(true)}
+      />
+
+      {/* ── THREEUI SYLVA HERO SHELL ─────────────────────────────────────── */}
+      <header className="sylva-hero">
+        <div className="stage">
+          {/* Column guides (z 1) */}
+          <div className="guides" aria-hidden="true">
+            <i style={{ left: 'calc(46 * var(--u))' }}></i>
+            <i style={{ left: 'calc(296 * var(--u))' }}></i>
+            <i style={{ left: 'calc(546 * var(--u))' }}></i>
+            <i style={{ left: 'calc(796 * var(--u))' }}></i>
+            <i style={{ left: 'calc(1046 * var(--u))' }}></i>
+            <i style={{ left: 'calc(1296 * var(--u))' }}></i>
+            <i style={{ left: 'calc(1554 * var(--u))' }}></i>
           </div>
 
-          <nav className="nav-links">
-            <button className="nav-link-btn" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              Overview
-            </button>
-            <button className="nav-link-btn" onClick={() => scrollToSection('architecture')}>
-              Architecture
-            </button>
-            <button className="nav-link-btn" onClick={() => scrollToSection('sound-lab')}>
-              Sound Lab
-            </button>
-            <button className="nav-link-btn" onClick={() => scrollToSection('color-studio')}>
-              Finishes
-            </button>
-            <button className="nav-link-btn" onClick={() => scrollToSection('specifications')}>
-              Specs
-            </button>
-          </nav>
+          {/* Monumental Ghost Wordmark (z 1) */}
+          <div className="ghost" aria-hidden="true">AURA</div>
 
-          <div className="nav-cta-group">
-            {/* 3D Background Control & Frame Telemetry */}
-            <div className="liquid-nav-telemetry">
-              <button
-                id="btn-toggle-autoplay"
-                className={`liquid-pill-toggle ${isAutoPlay ? 'active' : ''}`}
-                onClick={() => setIsAutoPlay(!isAutoPlay)}
-                title="Toggle 3D auto rotation"
-              >
-                {isAutoPlay ? '⏸ Pause 3D' : '▶ 3D Auto-Spin'}
-              </button>
-              <span className="frame-counter-pill">
-                FRM {String(currentFrame).padStart(3, '0')}/300
-              </span>
+          {/* Hero Headline (z 4) */}
+          <h1 className="headline">
+            <span><i>Pure Sonic</i></span>
+            <span><i>Architecture.</i></span>
+          </h1>
+
+          {/* Lede (z 4) */}
+          <p className="lede">
+            Restoring acoustic purity through patient unibody design, 40mm custom beryllium drivers, and a deeper kind of spatial immersion.
+          </p>
+
+          {/* Liquid-Metal Explore Control (z 4) */}
+          <div className="pill-clip">
+            <div className="pill">
+              <div className="liquid-stage liquid-stage--explore">
+                <div className="liquid-plate"></div>
+                <button
+                  className="liquid-button liquid-button--explore"
+                  onClick={() => scrollToSection('architecture')}
+                >
+                  <span className="ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </span>
+                  <span className="lbl">Explore 3D</span>
+                </button>
+              </div>
             </div>
+          </div>
 
-            {/* Primary Violet Liquid Button from UI.jpg */}
-            <button
-              id="nav-preorder-btn"
-              className="btn-liquid-primary"
-              onClick={() => setIsCheckoutOpen(true)}
-            >
-              Pre-Order • $349
-            </button>
+          {/* Liquid-Metal Play Control (z 4) */}
+          <div className="play-wrap">
+            <div className="play-clip">
+              <div className="liquid-stage liquid-stage--play">
+                <div className="liquid-plate"></div>
+                <button
+                  className="liquid-button liquid-button--play"
+                  onClick={() => setIsAutoPlay(!isAutoPlay)}
+                  title={isAutoPlay ? 'Pause 3D Rotation' : 'Auto-Spin 3D Model'}
+                >
+                  <span className="ico">
+                    {isAutoPlay ? (
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                    )}
+                  </span>
+                </button>
+              </div>
+            </div>
+            <div className="play-ring" aria-hidden="true"></div>
+          </div>
+
+          {/* Stat A (z 4) */}
+          <div className="stat stat--a">
+            <div className="mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
+            <dl>
+              <dt>Playtime</dt>
+              <dd>60 Hours Ultra-Life</dd>
+            </dl>
+          </div>
+
+          {/* Stat B (z 4) */}
+          <div className="stat stat--b">
+            <div className="mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2z"></path>
+                <path d="M12 6v12"></path>
+              </svg>
+            </div>
+            <dl>
+              <dt>Noise Cancellation</dt>
+              <dd>-42dB Hybrid ANC</dd>
+            </dl>
+          </div>
+
+          {/* Floating Luxury Card 1 (Acoustic Cavity) */}
+          <div className="card card--about" onClick={() => scrollToSection('architecture')}>
+            <span className="label">Field Note 01</span>
+            <h2>Acoustic Cavity</h2>
+            <figure>
+              <img src="/frames/ezgif-frame-001.png" alt="Acoustic Cavity" />
+            </figure>
+            <div className="knob" title="View Details">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </div>
+          </div>
+
+          {/* Floating Luxury Card 2 (Exploded Transducer) */}
+          <div className="card card--stove" onClick={() => scrollToSection('architecture')}>
+            <span className="label">Engineering</span>
+            <h2>Exploded 3D Transducer</h2>
+            <figure>
+              <img src="/frames/ezgif-frame-250.png" alt="Exploded Transducer" />
+            </figure>
+            <div className="knob" title="View Details">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Foreground Content Stack */}
-      <div className="foreground-content-stack">
-        {/* SECTION 1: Hero Stage */}
-        <section className="scroll-stage-section hero-stage">
-          <div className="hero-content-box">
-            <div className="liquid-badge-pill">
-              <span className="pulsing-radar"></span>
-              LIQUID GLASS ACOUSTIC ARCHITECTURE
-            </div>
-            <h1 className="hero-main-title">
-              PURE SONIC <br />
-              <span className="hero-gradient-text">TRANSCENDENCE.</span>
-            </h1>
-            <p className="hero-lead-text">
-              Sculpted for sensory perfection. The 3D headphone rotates and explodes in the background beneath refractive liquid glass surfaces.
-            </p>
-
-            {/* Liquid Action Buttons directly mirroring UI.jpg */}
-            <div className="hero-liquid-btn-row">
-              <button
-                className="btn-liquid-primary hero-btn"
-                onClick={() => setIsCheckoutOpen(true)}
-              >
-                Primary Button • Reserve Now
-              </button>
-
-              <button
-                className="btn-liquid-secondary hero-btn"
-                onClick={() => scrollToSection('architecture')}
-              >
-                Secondary Button • Explore 3D
-              </button>
-
-              <button
-                className="btn-circle-bubble"
-                onClick={() => setIsAutoPlay(!isAutoPlay)}
-                title="3D Auto-Spin Toggle"
-              >
-                +
-              </button>
-            </div>
-
-            {/* Floating Metric Liquid Pills */}
-            <div className="hero-metrics-pill-row">
-              <div className="liquid-metric-pill">
-                <span className="pill-dot cyan"></span>
-                <strong>40mm</strong> Dynamic Driver
-              </div>
-              <div className="liquid-metric-pill">
-                <span className="pill-dot indigo"></span>
-                <strong>-42dB</strong> Hybrid ANC
-              </div>
-              <div className="liquid-metric-pill">
-                <span className="pill-dot gold"></span>
-                <strong>60 Hours</strong> Playtime
-              </div>
-            </div>
-
-            <div className="scroll-indicator-cue">
-              <span className="mouse-icon">
-                <span className="mouse-wheel"></span>
-              </span>
-              <span className="cue-label">SCROLL TO ROTATE & EXPLODE 3D MODEL</span>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 2: Ergonomic Architecture Stage */}
-        <section className="scroll-stage-section" id="architecture">
-          <div className="section-container">
-            {/* Liquid Glass Narrative Card */}
-            <div className="liquid-glass-slab narrative-card">
-              <div className="card-kicker">STAGE 01 // ERGONOMIC MASTERY</div>
-              <h2 className="card-headline">Formed to the Human Silhouette</h2>
-              <p className="card-body">
-                Multi-axis aerospace-grade aluminum swivel hinges adapt smoothly to cranial contours. Premium memory foam ear cushions deliver an acoustic seal that blocks passive ambient bleed while maintaining featherweight all-day comfort.
-              </p>
-              <div className="feature-tags-group">
-                <span className="liquid-tag">CNC Swivel Hinge</span>
-                <span className="liquid-tag">Pressure-Relief Foam</span>
-                <span className="liquid-tag">Acoustic Isolation Ring</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 3: The Deconstruction (Exploded View) Stage */}
-        <section className="scroll-stage-section justify-right">
-          <div className="section-container align-right-container">
-            {/* Iridescent Gradient Card from UI.jpg ("Modern Glass UI Design") */}
-            <div className="iridescent-glass-card narrative-card">
-              <div className="card-kicker">STAGE 02 // PHYSICAL DISASSEMBLY</div>
-              <h2 className="card-headline">Inside the Chamber of Sound</h2>
-              <p className="card-body">
-                Our 3D exploded sequence reveals the heart of the transducer: high-flux neodymium magnets, an ultra-low jitter digital-to-analog converter (DAC), and precision micro-baffles engineered to prevent harmonic resonance.
-              </p>
-              <div className="feature-tags-group">
-                <span className="liquid-tag violet-glow">Dual-Baffle Chamber</span>
-                <span className="liquid-tag teal-glow">32-Bit Audiophile DAC</span>
-                <span className="liquid-tag rose-glow">Quad Mic Beamforming</span>
-              </div>
-              <div className="milky-pill-btn" style={{ marginTop: '20px' }}>
-                <span>↑ High-Precision Transducer Active</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 4: Precision Blueprint Schematic Stage */}
-        <section className="scroll-stage-section">
-          <div className="section-container">
-            <div className="liquid-glass-slab schematic-floating-hud">
-              <div className="schematic-header">
-                <div>
-                  <span className="card-kicker">STAGE 03 // BLUEPRINT PRECISION</span>
-                  <h2 className="schematic-title">Microscopic Engineering Revealed</h2>
+      {/* ── FOREGROUND CONTENT SECTIONS ─────────────────────────────────── */}
+      <div className="sylva-content-body">
+        {/* SECTION: Ergonomic Architecture */}
+        <section className="sylva-section" id="architecture">
+          <div className="sylva-container">
+            <div className="section-grid-split">
+              <div className="sylva-text-block">
+                <span className="sylva-tag">STAGE 01 // ERGONOMIC MASTERY</span>
+                <h2 className="sylva-heading">Formed to the Cranial Silhouette</h2>
+                <p className="sylva-copy">
+                  Multi-axis aerospace-grade aluminum swivel hinges adapt smoothly to cranial contours. Premium memory foam ear cushions deliver an acoustic seal that blocks passive ambient bleed while maintaining featherweight all-day comfort.
+                </p>
+                <div className="sylva-pill-badges">
+                  <span className="sylva-pill">CNC Swivel Hinge</span>
+                  <span className="sylva-pill">Memory Foam Seal</span>
+                  <span className="sylva-pill">Titanium Headband</span>
                 </div>
-                <span className="liquid-badge-pill">300/300 COMPLETE</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION: Physical Deconstruction */}
+        <section className="sylva-section justify-right">
+          <div className="sylva-container align-right-container">
+            <div className="sylva-text-block right-aligned">
+              <span className="sylva-tag">STAGE 02 // PHYSICAL DISASSEMBLY</span>
+              <h2 className="sylva-heading">Inside the Chamber of Sound</h2>
+              <p className="sylva-copy">
+                The 3D exploded sequence reveals the heart of the transducer: high-flux neodymium magnets, an ultra-low jitter digital-to-analog converter (DAC), and precision micro-baffles engineered to prevent harmonic resonance.
+              </p>
+              <div className="sylva-pill-badges justify-end">
+                <span className="sylva-pill">Dual-Baffle Chamber</span>
+                <span className="sylva-pill">32-Bit Audiophile DAC</span>
+                <span className="sylva-pill">Quad Beamforming Mics</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION: Precision Schematic Blueprint */}
+        <section className="sylva-section">
+          <div className="sylva-container">
+            <div className="sylva-blueprint-card">
+              <div className="blueprint-header">
+                <div>
+                  <span className="sylva-tag">STAGE 03 // BLUEPRINT PRECISION</span>
+                  <h2 className="sylva-heading">Microscopic Engineering Revealed</h2>
+                </div>
+                <span className="blueprint-status-tag">300/300 ACTIVE</span>
               </div>
 
-              <p className="schematic-desc">
+              <p className="sylva-copy">
                 All 18 precision sub-assemblies calibrated in harmonious balance. From the internal lithium-ion power cell to the reinforced titanium headband slider.
               </p>
 
-              <div className="schematic-highlights-grid">
-                <div className="schematic-spec-item">
-                  <span className="spec-bullet">01</span>
+              <div className="blueprint-specs-grid">
+                <div className="blueprint-spec-col">
+                  <span className="spec-num">01</span>
                   <div>
                     <strong>Neodymium 40mm Driver</strong>
-                    <p>Pure bass response down to 5Hz</p>
+                    <p>Frequency response down to 5Hz</p>
                   </div>
                 </div>
-                <div className="schematic-spec-item">
-                  <span className="spec-bullet">02</span>
+                <div className="blueprint-spec-col">
+                  <span className="spec-num">02</span>
                   <div>
                     <strong>High-Density Li-Ion Cell</strong>
                     <p>10-minute quick charge yields 10 hours</p>
                   </div>
                 </div>
-                <div className="schematic-spec-item">
-                  <span className="spec-bullet">03</span>
+                <div className="blueprint-spec-col">
+                  <span className="spec-num">03</span>
                   <div>
                     <strong>Bluetooth 5.3 SoC</strong>
                     <p>Ultra-low 28ms gaming latency</p>
                   </div>
                 </div>
-                <div className="schematic-spec-item">
-                  <span className="spec-bullet">04</span>
+                <div className="blueprint-spec-col">
+                  <span className="spec-num">04</span>
                   <div>
                     <strong>Multi-Axis Swivel Mechanism</strong>
                     <p>Rated for 25,000+ flex cycles</p>
@@ -270,42 +298,31 @@ export default function App() {
           </div>
         </section>
 
-        {/* Narrative Acoustic Comparison Strip */}
-        <section className="quote-banner-section">
-          <div className="quote-banner-content">
-            <div className="liquid-badge-pill">AUDIOPHILE CRITIQUE</div>
-            <blockquote className="quote-text">
-              “The Aura Pro renders micro-dynamics and acoustic separation so vividly, it feels like listening to music in zero gravity.”
-            </blockquote>
-            <span className="quote-author">— Sound & Vision Masterclass 2026</span>
-          </div>
-        </section>
-
-        {/* Interactive Sound Lab & ANC Simulation */}
+        {/* SECTION: Sound Lab & ANC Simulation */}
         <SoundLab />
 
-        {/* Colorway Studio Section */}
+        {/* SECTION: Colorway Studio */}
         <ColorStudio />
 
-        {/* Comprehensive Tech Specs Grid */}
+        {/* SECTION: Comprehensive Specs Grid */}
         <SpecsGrid />
 
-        {/* Feature Accolades Grid */}
-        <section className="accolades-section">
-          <div className="section-container">
-            <div className="accolades-grid">
-              <div className="liquid-glass-slab accolade-card">
-                <span className="liquid-badge-sub">AWARD WINNER</span>
+        {/* SECTION: Accolades & Critique */}
+        <section className="sylva-accolades-section">
+          <div className="sylva-container">
+            <div className="sylva-accolades-grid">
+              <div className="sylva-card-box">
+                <span className="sylva-card-kicker">AWARD WINNER</span>
                 <h4>Red Dot Best of the Best</h4>
                 <p>Recognized for seamless unibody aluminum engineering and acoustic harmony.</p>
               </div>
-              <div className="liquid-glass-slab accolade-card">
-                <span className="liquid-badge-sub">GOLD RATED</span>
+              <div className="sylva-card-box">
+                <span className="sylva-card-kicker">GOLD RATED</span>
                 <h4>Japan Audio Society Hi-Res</h4>
                 <p>Exceeds high-resolution playback criteria with response extending to 40kHz.</p>
               </div>
-              <div className="liquid-glass-slab accolade-card">
-                <span className="liquid-badge-sub">ZERO LATENCY</span>
+              <div className="sylva-card-box">
+                <span className="sylva-card-kicker">ZERO LATENCY</span>
                 <h4>Pro Studio Certified</h4>
                 <p>Ultra-low latency audio processing suitable for broadcast and competitive esports.</p>
               </div>
@@ -313,74 +330,35 @@ export default function App() {
           </div>
         </section>
 
-        {/* Final Pre-Order Call to Action Banner */}
-        <section className="final-cta-section">
-          <div className="final-cta-inner">
-            <div className="liquid-badge-pill">LIMITED FIRST EDITION</div>
-            <h2 className="final-title">Ascend to Pure Audio Architecture</h2>
-            <p className="final-sub">
+        {/* Final Pre-Order Banner */}
+        <section className="sylva-cta-section">
+          <div className="sylva-cta-box">
+            <span className="sylva-tag">LIMITED FIRST EDITION</span>
+            <h2 className="sylva-cta-title">Ascend to Pure Audio Architecture</h2>
+            <p className="sylva-cta-sub">
               Each pair in the initial 1,500 unit production run includes a numbered commemorative stainless steel card and lifetime priority concierge support.
             </p>
-            <div className="final-btn-row">
-              <button
-                id="btn-final-preorder"
-                className="btn-liquid-primary large"
-                onClick={() => setIsCheckoutOpen(true)}
-              >
-                Reserve Aura Pro • $349 USD
-              </button>
-            </div>
+            <button
+              className="liquid-button liquid-button--explore cta-explore-btn"
+              onClick={() => setIsCheckoutOpen(true)}
+            >
+              <span className="lbl">Reserve Aura Pro • $349 USD</span>
+            </button>
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="cinema-footer">
-          <div className="footer-inner">
-            <div className="footer-top-row">
-              <div className="footer-brand">
-                <span className="brand-symbol">◈</span>
-                <strong>AURA AUDIO ARCHITECTURE</strong>
-              </div>
-              <span className="footer-copyright">
-                © 2026 Aura Technologies Inc. All rights reserved.
-              </span>
+        {/* ThreeUI Styled Footer */}
+        <footer className="sylva-footer">
+          <div className="sylva-container footer-flex">
+            <div className="footer-left">
+              <span className="footer-icon">◈</span>
+              <strong>AURA PRO // APEX AUDIO ARCHITECTURE</strong>
             </div>
-            <div className="footer-bottom-row">
-              <span>Designed with Liquid Glass UI Kit</span>
-              <span className="footer-spec-badge">VisionOS Aesthetic Active</span>
-            </div>
+            <span className="footer-meta">
+              © 2026 Aura Technologies Inc. All rights reserved.
+            </span>
           </div>
         </footer>
-      </div>
-
-      {/* Bottom Sticky Purchase Dock (Reveals after scroll) */}
-      <div className={`sticky-bottom-dock ${showStickyBar ? 'visible' : ''}`}>
-        <div className="dock-inner liquid-glass-dock">
-          <div className="dock-left">
-            <img
-              src="/frames/ezgif-frame-001.png"
-              alt="Aura Pro"
-              className="dock-thumb"
-            />
-            <div>
-              <span className="dock-name">AURA PRO WIRELESS</span>
-              <span className="dock-sub">Hi-Res • Hybrid ANC • 60H Battery</span>
-            </div>
-          </div>
-          <div className="dock-right">
-            <div className="dock-pricing">
-              <span className="dock-strike">$399</span>
-              <span className="dock-price">$349</span>
-            </div>
-            <button
-              id="dock-preorder-btn"
-              className="btn-liquid-primary compact"
-              onClick={() => setIsCheckoutOpen(true)}
-            >
-              Order Now
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Pre-Order Slide-out Modal */}
