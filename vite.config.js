@@ -11,7 +11,8 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'serve-project-frames',
+      name: 'handle-project-frames',
+      // Development server middleware
       configureServer(server) {
         server.middlewares.use('/frames', (req, res, next) => {
           const cleanUrl = req.url.split('?')[0].replace(/^\//, '');
@@ -24,6 +25,21 @@ export default defineConfig({
             next();
           }
         });
+      },
+      // Production build: copy frames into dist/frames so Vercel serves them cleanly
+      closeBundle() {
+        const srcDir = path.join(__dirname, 'frames');
+        const destDir = path.join(__dirname, 'dist', 'frames');
+        if (fs.existsSync(srcDir)) {
+          if (!fs.existsSync(destDir)) {
+            fs.mkdirSync(destDir, { recursive: true });
+          }
+          const files = fs.readdirSync(srcDir);
+          for (const file of files) {
+            fs.copyFileSync(path.join(srcDir, file), path.join(destDir, file));
+          }
+          console.log(`[build] Successfully copied ${files.length} frames into dist/frames for production deployment.`);
+        }
       }
     }
   ],
